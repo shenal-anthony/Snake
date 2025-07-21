@@ -155,6 +155,7 @@
                 Dir = dirChanges.First.Value;
                 dirChanges.RemoveFirst();
             }
+
             Position newHeadPos = HeadPosition().Translate(Dir);
             GridValue hit = WillHit(newHeadPos);
 
@@ -162,7 +163,6 @@
             {
                 GameOver = true;
             }
-
             else if (hit == GridValue.Empty)
             {
                 RemoveTail();

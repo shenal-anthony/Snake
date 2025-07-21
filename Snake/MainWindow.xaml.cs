@@ -88,10 +88,10 @@ namespace Snake
                     gameState.ChangeDirection(Direction.Right);
                     break;
                 case Key.Up:
-                    gameState.ChangeDirection(Direction.Up);
+                    gameState.ChangeDirection(Direction.Down);
                     break;
                 case Key.Down:
-                    gameState.ChangeDirection(Direction.Down);
+                    gameState.ChangeDirection(Direction.Up);
                     break;
             }
         }
@@ -99,9 +99,9 @@ namespace Snake
 
         private async Task GameLoop()
         {
-            if (!gameState.GameOver)
+            while (!gameState.GameOver)
             {
-                await Task.Delay(100);
+                await Task.Delay(200);
                 gameState.Move();
                 Draw();
             }
@@ -113,7 +113,7 @@ namespace Snake
             Image[,] images = new Image[rows, cols];
             GameGrid.Rows = rows;
             GameGrid.Columns = cols;
-            GameGrid.Width = GameGrid.Height * (cols/ (double)rows);
+            GameGrid.Width = GameGrid.Height * (cols / (double)rows);
 
             for (int r = 0; r < rows; r++)
             {
@@ -172,7 +172,7 @@ namespace Snake
             for (int i = 0; i < positions.Count; i++)
             {
                 Position pos = positions[i];
-                ImageSource source = (i = 0) == 0 ? Images.DeadHead : Images.DeadBody;
+                ImageSource source = (i == 0) ? Images.DeadHead : Images.DeadBody;
                 gridImages[pos.Row, pos.Col].Source = source;
                 await Task.Delay(50);
             }

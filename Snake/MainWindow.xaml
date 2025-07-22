@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:Snake"
         mc:Ignorable="d"
         Title="Snake" Height="500" Width="800"
-        MinWidth="300"
-        MinHeight="300"
+        MinWidth="600"
+        MinHeight="400"
         Background="{StaticResource BackgroundColor}"
         Foreground="{StaticResource TextColor}"
         FontFamily="{StaticResource MainFont}"
@@ -65,6 +65,26 @@
                            VerticalAlignment="Center"
                            FontSize="26"
                            TextWrapping="Wrap"/>
+            </Border>
+
+
+            <Border
+                x:Name="PauseOverlay"
+                Grid.Row="1"
+                Background="{StaticResource OverlayColor}"
+                Visibility="Collapsed"
+                Width="{Binding Path=ActualWidth, ElementName=GridBorder}"
+                Height="{Binding Path=ActualHeight, ElementName=GridBorder}"
+                Margin="{Binding Path=Margin, ElementName=GridBorder}"
+                RenderOptions.EdgeMode="Aliased">
+                <TextBlock
+                    x:Name="PauseOverlayText"
+               
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="26"
+                    FontWeight="Bold"
+                    />
             </Border>
 
         </Grid>

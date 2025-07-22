@@ -11,7 +11,7 @@
 
         private readonly LinkedList<Direction> dirChanges = new LinkedList<Direction>();
         private readonly LinkedList<Position> snakePositions = new LinkedList<Position>();
-        private readonly Random random = new Random();
+        private readonly Random random = new();
 
         public GameState(int rows, int cols)
         {
@@ -50,7 +50,7 @@
             }
         }
 
-        private void AddFood()
+        private void AddFood(int count = 1)
         {
             List<Position> empty = new List<Position>(EmptyPositions());
 
@@ -59,10 +59,43 @@
                 return;
             }
 
-            Position pos = empty[random.Next(empty.Count)];
-            Grid[pos.Row, pos.Col] = GridValue.Food;
+            // shuffle the empty positions list
+            empty = empty.OrderBy(x => random.Next()).ToList();
+
+            // limit the number of food to the number of available empty cells
+            int foodCount = Math.Min(count, empty.Count);
 
 
+            for (int i = 0; i < foodCount; i++)
+            {
+                Position pos = empty[i];
+                Grid[pos.Row, pos.Col] = GridValue.Food;
+            }
+
+        }
+
+        private bool IsFoodAvailable()
+        {
+            foreach (var cell in Grid)
+            {
+                if (cell == GridValue.Food)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private int GetFoodSpawnCount()
+        {
+            int roll = random.Next(100);
+
+            if (roll < 60)
+                return 1;
+            else if (roll < 90)
+                return 2;
+            else
+                return 3;
         }
 
         public Position HeadPosition()
@@ -173,7 +206,16 @@
             {
                 AddHead(newHeadPos);
                 Score++;
-                AddFood();
+     
+                // check if any food remains
+                if (!IsFoodAvailable())
+                {
+                    // randomly choose how many food items to place
+                    int newFoodCount = GetFoodSpawnCount();
+                    AddFood(newFoodCount);
+
+                }
+
             }
         }
 

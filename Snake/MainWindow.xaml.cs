@@ -1,14 +1,9 @@
-﻿using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace Snake
 {
@@ -37,6 +32,7 @@ namespace Snake
         private readonly Image[,] gridImages;
         private GameState gameState;
         private bool gameRunning;
+        private bool isPaused = false;
 
         public MainWindow()
         {
@@ -48,7 +44,8 @@ namespace Snake
         private async Task RunGame()
         {
             Draw();
-            await ShowCountDown();
+            OverlayText.Text = "PRESS ANY KEY TO START";
+            await ShowCountDown(Overlay, OverlayText);
             Overlay.Visibility = Visibility.Hidden;
             await GameLoop();
             await ShowGameOver();
@@ -58,6 +55,14 @@ namespace Snake
 
         private async void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.P)
+            {
+                await TogglePause();
+                e.Handled = true;
+                return;
+            }
+
+
             if (Overlay.Visibility == Visibility.Visible)
             {
                 e.Handled = true;
@@ -71,7 +76,6 @@ namespace Snake
             }
         }
 
-
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (gameState.GameOver)
@@ -81,31 +85,73 @@ namespace Snake
 
             switch (e.Key)
             {
-                case Key.Left:
+                case Key.A:
                     gameState.ChangeDirection(Direction.Left);
                     break;
-                case Key.Right:
+                case Key.D:
                     gameState.ChangeDirection(Direction.Right);
                     break;
-                case Key.Up:
-                    gameState.ChangeDirection(Direction.Down);
-                    break;
-                case Key.Down:
+                case Key.W:
                     gameState.ChangeDirection(Direction.Up);
                     break;
+                case Key.S:
+                    gameState.ChangeDirection(Direction.Down);
+                    break;
+            }
+        }
+
+
+        private async Task TogglePause()
+        {
+            if (!isPaused)
+            {
+                // Pause the game
+                isPaused = true;
+                PauseOverlayText.Text = "PAUSED";
+                PauseOverlay.Visibility = Visibility.Visible;
+
+            }
+
+            else
+            {
+                await ShowCountDown(PauseOverlay, PauseOverlayText);
+                isPaused = false;
+                PauseOverlay.Visibility = Visibility.Collapsed;
             }
         }
 
 
         private async Task GameLoop()
         {
+            const int totalDelay = 200;
+            const int step = 10; // check every 10ms for better pause response
+            int elapsed = 0;
+
             while (!gameState.GameOver)
             {
-                await Task.Delay(200);
+                // Wait totalDelay but check for pause every step
+                while (elapsed < totalDelay)
+                {
+                    if (isPaused)
+                    {
+                        // Wait until unpaused
+                        while (isPaused)
+                        {
+                            await Task.Delay(step);
+                        }
+                        elapsed = 0; // reset elapsed after pause
+                    }
+
+                    await Task.Delay(step);
+                    elapsed += step;
+                }
+
                 gameState.Move();
                 Draw();
+                elapsed = 0;
             }
         }
+
 
 
         private Image[,] SetupGrid()
@@ -179,13 +225,17 @@ namespace Snake
 
         }
 
-        private async Task ShowCountDown()
+        private async Task ShowCountDown(Border overlay, TextBlock textBlock)
         {
+            overlay.Visibility = Visibility.Visible;
+
             for (int r = 3; r >= 1; r--)
             {
-                OverlayText.Text = r.ToString();
+                textBlock.Text = r.ToString();
                 await Task.Delay(500);
             }
+
+            overlay.Visibility = Visibility.Collapsed;
 
         }
 
